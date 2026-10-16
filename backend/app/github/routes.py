@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Response
 
 from app import db
+from app.assessment.pipeline import execute_run, start_run
 from app.github import client
 from app.github.client import GitHubError
 from app.github.snapshot import latest_snapshot, snapshot_files, take_snapshot
@@ -47,7 +48,7 @@ def _load_repo(conn, repo_id: int) -> Repo:
 
 
 @router.post("", response_model=Repo, status_code=201)
-def connect_repo(payload: RepoCreate, response: Response):
+def connect_repo(payload: RepoCreate, response: Response, background: BackgroundTasks):
     try:
         owner, name = client.parse_full_name(payload.full_name)
         branch = (payload.branch or "").strip() or client.get_default_branch(owner, name)
@@ -67,7 +68,10 @@ def connect_repo(payload: RepoCreate, response: Response):
             )
             repo = conn.execute("SELECT * FROM repos WHERE id = ?", (cur.lastrowid,)).fetchone()
             take_snapshot(conn, repo, head)
-            return _load_repo(conn, repo["id"])
+            run_id = start_run(conn, repo["id"], "initial")
+            result = _load_repo(conn, repo["id"])
+        background.add_task(execute_run, run_id)
+        return result
     except GitHubError as e:
         raise HTTPException(e.status_code, str(e))
 

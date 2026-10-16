@@ -22,4 +22,8 @@ export const api = {
   connectRepo: (fullName, branch) =>
     request("/api/repos", { method: "POST", body: JSON.stringify({ full_name: fullName, branch: branch || null }) }),
   deleteRepo: (id) => request(`/api/repos/${id}`, { method: "DELETE" }),
+  assess: (repoId) => request(`/api/repos/${repoId}/assess`, { method: "POST" }),
+  latestRun: (repoId) => request(`/api/repos/${repoId}/latest-run`),
+  getRun: (runId) => request(`/api/runs/${runId}`),
+  listRuns: (repoId) => request(`/api/repos/${repoId}/runs`),
 };

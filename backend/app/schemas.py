@@ -70,6 +70,46 @@ class Repo(BaseModel):
     latest_snapshot: Snapshot | None
 
 
+class EvidenceOut(BaseModel):
+    path: str
+    start_line: int | None
+    end_line: int | None
+    snippet: str | None
+    permalink: str
+    source: str
+    verified: bool
+
+
+class SkillResult(BaseModel):
+    skill_key: str
+    skill_label: str
+    status: str
+    confidence: str | None
+    rationale: str | None
+    method: str
+    carried_over: bool
+    evidence: list[EvidenceOut]
+
+
+class RunSummary(BaseModel):
+    id: int
+    repo_id: int
+    commit_sha: str
+    commit_message: str | None
+    trigger: str
+    status: str
+    error: str | None
+    prev_run_id: int | None
+    changed_files: list[str]
+    affected_skills: list[str]
+    started_at: str
+    finished_at: str | None
+
+
+class Run(RunSummary):
+    skills: list[SkillResult]
+
+
 class Skill(BaseModel):
     key: str
     label: str

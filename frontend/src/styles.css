@@ -58,6 +58,16 @@ button.small { background: none; color: var(--muted); padding: 2px 6px; }
 .table-wrap { overflow-x: auto; }
 .checkbox.inline { display: inline-flex; margin-left: 8px; }
 
+.pill.status-demonstrated { background: #e3f4ea; color: var(--ok); }
+.pill.status-partially_demonstrated { background: #fff4dc; color: #a46a00; }
+.pill.status-not_demonstrated { background: #eef0f3; color: var(--muted); }
+.note { border-left: 3px solid var(--border); padding-left: 8px; }
+.evidence { list-style: none; padding: 0; margin: 6px 0 0; }
+.evidence li { margin: 2px 0; }
+.evidence summary { cursor: pointer; }
+.snippet { background: #f3f4f6; border-radius: 6px; padding: 8px; overflow-x: auto; font-size: 0.8rem; margin: 4px 0; }
+select { font: inherit; padding: 8px; border: 1px solid var(--border); border-radius: 6px; max-width: 100%; }
+
 .muted { color: var(--muted); font-size: 0.9rem; }
 .mono { font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
 .error { color: var(--bad); }

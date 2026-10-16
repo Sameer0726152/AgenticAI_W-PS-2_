@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app import config, db
+from app.assessment.routes import router as assessments_router
 from app.github.routes import router as repos_router
 from app.jobs.routes import router as jobs_router
 from app.llm.rate_limit import limiter
@@ -36,6 +37,7 @@ app.add_middleware(
 )
 app.include_router(jobs_router)
 app.include_router(repos_router)
+app.include_router(assessments_router)
 
 
 @app.get("/", include_in_schema=False)
