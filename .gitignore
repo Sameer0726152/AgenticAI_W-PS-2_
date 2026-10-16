@@ -4,3 +4,17 @@
 .env.test.local
 .env.production.local
 *.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+
+# Database
+database/*.db
+database/*.db-shm
+database/*.db-wal

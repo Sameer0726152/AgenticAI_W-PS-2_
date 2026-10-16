@@ -1,0 +1,53 @@
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #1d2330;
+  --muted: #6b7280;
+  --border: #e3e6eb;
+  --accent: #2f6fde;
+  --ok: #1f8a4c;
+  --bad: #c0392b;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+body { margin: 0; }
+.app { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.header h1 { font-size: 1.4rem; margin: 8px 0; }
+.health { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.jobs-layout { display: grid; grid-template-columns: minmax(280px, 1fr) 2fr; gap: 16px; margin-top: 12px; }
+@media (max-width: 800px) { .jobs-layout { grid-template-columns: 1fr; } }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-width: 0; }
+.card h2 { font-size: 1.05rem; margin: 0 0 12px; }
+.card h2 + * { margin-top: 0; }
+
+.job-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+input[type="url"], textarea { font: inherit; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
+button { font: inherit; padding: 8px 12px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: wait; }
+button.link { background: none; color: var(--text); padding: 4px 0; text-align: left; flex: 1; }
+button.small { background: none; color: var(--muted); padding: 2px 6px; }
+.checkbox { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 0.9rem; }
+
+.job-list { list-style: none; padding: 0; margin: 0; }
+.job-list li { display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+.job-list li.active { background: #eef3fd; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--border); }
+.table th { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+.quote { font-style: italic; }
+
+.pill { display: inline-block; font-size: 0.8rem; padding: 2px 8px; border-radius: 999px; background: #eef0f3; }
+.pill.ok { background: #e3f4ea; color: var(--ok); }
+.pill.bad { background: #fbe9e7; color: var(--bad); }
+.pill.req { background: #e8effc; color: var(--accent); }
+
+.muted { color: var(--muted); font-size: 0.9rem; }
+.mono { font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
+.error { color: var(--bad); }
+a { color: var(--accent); word-break: break-all; }

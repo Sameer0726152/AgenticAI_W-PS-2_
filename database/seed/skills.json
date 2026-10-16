@@ -1,0 +1,101 @@
+[
+  {
+    "key": "python", "label": "Python", "category": "language",
+    "synonyms": ["python3", "py"],
+    "rule_hints": {"paths": ["**/*.py", "requirements.txt", "pyproject.toml", "setup.py", "Pipfile"]}
+  },
+  {
+    "key": "go", "label": "Go", "category": "language",
+    "synonyms": ["golang"],
+    "rule_hints": {"paths": ["**/*.go", "go.mod"]}
+  },
+  {
+    "key": "cpp", "label": "C++", "category": "language",
+    "synonyms": ["c plus plus", "cpp", "modern c++"],
+    "rule_hints": {"paths": ["**/*.cpp", "**/*.cc", "**/*.cxx", "**/*.hpp", "CMakeLists.txt"]}
+  },
+  {
+    "key": "rest_api", "label": "REST APIs / API design", "category": "backend",
+    "synonyms": ["rest", "rest api", "restful", "api", "apis", "api design", "http api", "web services", "endpoints", "writing apis"],
+    "rule_hints": {
+      "dependencies": ["fastapi", "flask", "django", "djangorestframework", "express", "gin-gonic/gin", "spring-boot-starter-web"],
+      "code_patterns": ["@(app|router|bp)\\.(get|post|put|patch|delete)\\(", "@app\\.route\\(", "app\\.(get|post|put|delete)\\(", "@(Get|Post|Put|Delete)Mapping"]
+    }
+  },
+  {
+    "key": "sql_db", "label": "SQL / Relational databases", "category": "data",
+    "synonyms": ["sql", "databases", "database", "relational databases", "postgres", "postgresql", "mysql", "sqlite", "orm"],
+    "rule_hints": {
+      "paths": ["**/*.sql", "**/migrations/**", "alembic.ini"],
+      "dependencies": ["sqlalchemy", "psycopg2", "psycopg2-binary", "psycopg", "asyncpg", "pymysql", "mysqlclient", "sequelize", "prisma", "pg", "gorm.io/gorm"],
+      "code_patterns": ["\\bSELECT\\b.+\\bFROM\\b", "create_engine\\(", "Column\\(", "models\\.Model"]
+    }
+  },
+  {
+    "key": "kv_store", "label": "Key-value stores", "category": "data",
+    "synonyms": ["redis", "dynamodb", "memcached", "key-value storage", "key value store", "nosql"],
+    "rule_hints": {"dependencies": ["redis", "aioredis", "pymemcache", "ioredis"], "code_patterns": ["dynamodb"]}
+  },
+  {
+    "key": "testing", "label": "Unit / Automated testing", "category": "practice",
+    "synonyms": ["unit testing", "unit tests", "automated testing", "test automation", "pytest", "jest", "testing", "tdd"],
+    "rule_hints": {
+      "paths": ["tests/**", "test/**", "**/test_*.py", "**/*_test.py", "**/*.test.js", "**/*.test.ts", "**/*.spec.js", "**/*.spec.ts", "**/*_test.go", "pytest.ini", "conftest.py"],
+      "dependencies": ["pytest", "jest", "vitest", "mocha"],
+      "code_patterns": ["def test_\\w+\\(", "\\bdescribe\\(", "func Test\\w+\\("]
+    }
+  },
+  {
+    "key": "version_control", "label": "Version control (Git)", "category": "practice",
+    "synonyms": ["git", "github", "version control", "source control"],
+    "rule_hints": {"paths": [".gitignore", ".gitattributes"]}
+  },
+  {
+    "key": "ci_cd", "label": "CI/CD", "category": "devops",
+    "synonyms": ["continuous integration", "continuous deployment", "continuous delivery", "ci", "cd", "github actions", "pipelines", "ci/cd pipelines"],
+    "rule_hints": {"paths": [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml", ".circleci/config.yml", "Jenkinsfile", "azure-pipelines.yml"]}
+  },
+  {
+    "key": "docker", "label": "Docker", "category": "devops",
+    "synonyms": ["containers", "containerization", "docker compose"],
+    "rule_hints": {"paths": ["Dockerfile", "**/Dockerfile", "docker-compose.yml", "docker-compose.yaml", "compose.yaml", ".dockerignore"]}
+  },
+  {
+    "key": "kubernetes", "label": "Kubernetes", "category": "devops",
+    "synonyms": ["k8s", "helm", "container orchestration"],
+    "rule_hints": {"paths": ["k8s/**", "kubernetes/**", "helm/**", "**/Chart.yaml"], "code_patterns": ["kind:\\s*(Deployment|Service|Ingress|StatefulSet)"]}
+  },
+  {
+    "key": "iac", "label": "Infrastructure as code", "category": "devops",
+    "synonyms": ["terraform", "cloudformation", "pulumi", "infrastructure as code", "iac"],
+    "rule_hints": {"paths": ["**/*.tf", "**/*.tfvars", "Pulumi.yaml", "cdk.json"], "code_patterns": ["AWSTemplateFormatVersion"]}
+  },
+  {
+    "key": "cloud", "label": "AWS / Cloud", "category": "devops",
+    "synonyms": ["aws", "gcp", "google cloud", "azure", "cloud", "cloud computing"],
+    "rule_hints": {"dependencies": ["boto3", "aws-sdk", "@aws-sdk/client-s3", "google-cloud-storage", "azure-storage-blob"], "paths": ["serverless.yml", "app.yaml", "vercel.json"]}
+  },
+  {
+    "key": "linux", "label": "Linux", "category": "systems",
+    "synonyms": ["unix", "shell", "bash", "linux servers", "linux system programming"],
+    "rule_hints": {"paths": ["**/*.sh"], "code_patterns": ["^#!/(usr/)?bin/(env )?(ba)?sh"]}
+  },
+  {
+    "key": "messaging", "label": "Messaging / Streaming", "category": "backend",
+    "synonyms": ["kafka", "sqs", "rabbitmq", "pub/sub", "message queues", "message passing", "streaming"],
+    "rule_hints": {"dependencies": ["kafka-python", "confluent-kafka", "aiokafka", "pika", "celery", "kafkajs", "amqplib"], "code_patterns": ["sqs"]}
+  },
+  {
+    "key": "distributed", "label": "Distributed systems", "category": "systems",
+    "synonyms": ["distributed systems", "microservices", "microservice architectures", "concurrency", "scalability", "fault tolerance"],
+    "rule_hints": null
+  },
+  {
+    "key": "observability", "label": "Observability / Logging", "category": "devops",
+    "synonyms": ["logging", "monitoring", "metrics", "tracing", "observability", "observability tooling"],
+    "rule_hints": {
+      "dependencies": ["prometheus-client", "prometheus_client", "opentelemetry-api", "opentelemetry-sdk", "sentry-sdk", "structlog", "winston"],
+      "code_patterns": ["logging\\.getLogger\\(", "logger\\.(info|warning|error|exception)\\("]
+    }
+  }
+]
