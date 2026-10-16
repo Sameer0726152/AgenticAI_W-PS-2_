@@ -18,4 +18,8 @@ export const api = {
   createJob: (url, text) =>
     request("/api/jobs", { method: "POST", body: JSON.stringify({ url, text: text || null }) }),
   deleteJob: (id) => request(`/api/jobs/${id}`, { method: "DELETE" }),
+  listRepos: () => request("/api/repos"),
+  connectRepo: (fullName, branch) =>
+    request("/api/repos", { method: "POST", body: JSON.stringify({ full_name: fullName, branch: branch || null }) }),
+  deleteRepo: (id) => request(`/api/repos/${id}`, { method: "DELETE" }),
 };

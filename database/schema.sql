@@ -64,6 +64,13 @@ CREATE TABLE IF NOT EXISTS snapshot_files (
     PRIMARY KEY (snapshot_id, path)
 );
 
+-- File contents by Git blob SHA: identical content is fetched from GitHub only once.
+CREATE TABLE IF NOT EXISTS blobs (
+    blob_sha   TEXT PRIMARY KEY,
+    content    TEXT,                       -- NULL when binary/undecodable
+    is_binary  INTEGER NOT NULL DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS runs (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     repo_id          INTEGER NOT NULL REFERENCES repos(id) ON DELETE CASCADE,

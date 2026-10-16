@@ -3,8 +3,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app import config, db
+from app.github.routes import router as repos_router
 from app.jobs.routes import router as jobs_router
 from app.llm.rate_limit import limiter
 from app.schemas import Skill
@@ -33,6 +35,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(jobs_router)
+app.include_router(repos_router)
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    return RedirectResponse("/docs")
 
 
 @app.get("/api/health")

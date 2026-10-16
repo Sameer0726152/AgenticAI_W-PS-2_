@@ -36,6 +36,40 @@ class JobSummary(BaseModel):
     requirement_count: int
 
 
+class RepoCreate(BaseModel):
+    full_name: str  # "owner/name" or a github.com URL
+    branch: str | None = None  # defaults to the repo's default branch
+
+
+class SnapshotFile(BaseModel):
+    path: str
+    size: int
+    included: bool
+    skip_reason: str | None
+    url: str
+
+
+class Snapshot(BaseModel):
+    id: int
+    commit_sha: str
+    commit_message: str | None
+    committed_at: str | None
+    commit_url: str
+    files_included: int
+    files_skipped: int
+    files: list[SnapshotFile]
+
+
+class Repo(BaseModel):
+    id: int
+    full_name: str
+    branch: str
+    html_url: str
+    polling: bool
+    last_polled_at: str | None
+    latest_snapshot: Snapshot | None
+
+
 class Skill(BaseModel):
     key: str
     label: str

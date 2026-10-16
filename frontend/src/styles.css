@@ -47,6 +47,17 @@ button.small { background: none; color: var(--muted); padding: 2px 6px; }
 .pill.bad { background: #fbe9e7; color: var(--bad); }
 .pill.req { background: #e8effc; color: var(--accent); }
 
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-top: 8px; }
+.tab { background: none; color: var(--muted); border-radius: 6px 6px 0 0; border-bottom: 2px solid transparent; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+.stack { display: flex; flex-direction: column; gap: 16px; margin-top: 12px; }
+.row-form { display: flex; flex-wrap: wrap; gap: 8px; }
+.row-form input { flex: 1 1 200px; font: inherit; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
+.card-head { display: flex; justify-content: space-between; align-items: start; }
+.table-wrap { overflow-x: auto; }
+.checkbox.inline { display: inline-flex; margin-left: 8px; }
+
 .muted { color: var(--muted); font-size: 0.9rem; }
 .mono { font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
 .error { color: var(--bad); }

@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 import { api } from "./api.js";
 import JobsPage from "./pages/JobsPage.jsx";
+import RepoPage from "./pages/RepoPage.jsx";
+
+const TABS = [
+  { id: "jobs", label: "Jobs" },
+  { id: "repo", label: "Repository" },
+];
 
 export default function App() {
   const [health, setHealth] = useState(null);
   const [healthError, setHealthError] = useState(null);
+  const [tab, setTab] = useState("jobs");
 
   const refreshHealth = () =>
     api
@@ -37,8 +44,16 @@ export default function App() {
           )}
         </div>
       </header>
+      <nav className="tabs">
+        {TABS.map((t) => (
+          <button key={t.id} className={tab === t.id ? "tab active" : "tab"} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </nav>
       <main>
-        <JobsPage onJobAdded={refreshHealth} />
+        {tab === "jobs" && <JobsPage onJobAdded={refreshHealth} />}
+        {tab === "repo" && <RepoPage />}
       </main>
     </div>
   );
