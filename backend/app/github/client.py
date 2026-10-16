@@ -105,6 +105,17 @@ def get_blob_text(owner: str, name: str, blob_sha: str) -> str | None:
         return None
 
 
+def compare(owner: str, name: str, base: str, head: str) -> list[dict]:
+    """Files changed between two commits: [{path, status, previous_path}]."""
+    with _client() as c:
+        resp = c.get(f"/repos/{owner}/{name}/compare/{base}...{head}")
+    _check(resp, "Commit comparison")
+    return [
+        {"path": f["filename"], "status": f["status"], "previous_path": f.get("previous_filename")}
+        for f in resp.json().get("files", [])
+    ]
+
+
 def count_commits(owner: str, name: str, branch: str) -> int:
     """Number of commits on a branch, read from the pagination 'last' link with per_page=1."""
     with _client() as c:

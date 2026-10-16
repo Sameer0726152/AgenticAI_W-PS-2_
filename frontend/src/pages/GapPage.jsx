@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { api } from "../api.js";
 import EvidenceList from "../components/EvidenceList.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
+import ChangeBanner from "../components/ChangeBanner.jsx";
+import WatchStatus from "../components/WatchStatus.jsx";
 import { formatTime, useLatestRun } from "../useLatestRun.js";
 
 function SummaryTile({ label, demonstrated, partial, total }) {
@@ -79,10 +81,19 @@ export default function GapPage() {
             </select>
           </label>
         </div>
+        <WatchStatus repoId={repoId} latest={latest} />
         {error && <p className="error">{error}</p>}
 
         {gaps && (
           <>
+            <ChangeBanner
+              trigger={gaps.trigger}
+              commitSha={gaps.commit_sha}
+              commitMessage={gaps.commit_message}
+              changedFiles={gaps.changed_files}
+              changes={gaps.changes}
+              finishedAt={gaps.assessed_at}
+            />
             <p className="muted">
               Job source:{" "}
               <a href={gaps.job.source_url} target="_blank" rel="noreferrer">

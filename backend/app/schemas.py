@@ -91,6 +91,19 @@ class SkillResult(BaseModel):
     evidence: list[EvidenceOut]
 
 
+class ChangedFile(BaseModel):
+    path: str
+    status: str  # added | modified | removed | renamed ...
+    previous_path: str | None = None
+
+
+class SkillChange(BaseModel):
+    skill_key: str
+    skill_label: str
+    from_status: str
+    to_status: str
+
+
 class RunSummary(BaseModel):
     id: int
     repo_id: int
@@ -100,8 +113,9 @@ class RunSummary(BaseModel):
     status: str
     error: str | None
     prev_run_id: int | None
-    changed_files: list[str]
+    changed_files: list[ChangedFile]
     affected_skills: list[str]
+    changes: list[SkillChange]
     started_at: str
     finished_at: str | None
 

@@ -24,6 +24,7 @@ export const api = {
   deleteRepo: (id) => request(`/api/repos/${id}`, { method: "DELETE" }),
   assess: (repoId) => request(`/api/repos/${repoId}/assess`, { method: "POST" }),
   latestRun: (repoId) => request(`/api/repos/${repoId}/latest-run`),
+  checkNow: (repoId) => request(`/api/repos/${repoId}/check`, { method: "POST" }),
   getRun: (runId) => request(`/api/runs/${runId}`),
   listRuns: (repoId) => request(`/api/repos/${repoId}/runs`),
   gaps: (repoId, jobId) => request(`/api/gaps?repo_id=${repoId}&job_id=${jobId}`),

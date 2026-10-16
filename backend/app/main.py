@@ -12,6 +12,7 @@ from app.jobs.routes import router as jobs_router
 from app.llm.rate_limit import limiter
 from app.schemas import Skill
 from app.skills.taxonomy import list_skills
+from app.watch.poller import poller
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -25,7 +26,15 @@ async def lifespan(app: FastAPI):
             (db.utc_now()[:10],),
         ).fetchone()[0]
     limiter.set_used_today(used)
+    with db.transaction() as conn:  # a restart (e.g. --reload) interrupts in-flight runs
+        conn.execute(
+            "UPDATE runs SET status = 'failed', error = 'Interrupted by server restart', finished_at = ? "
+            "WHERE status = 'running'",
+            (db.utc_now(),),
+        )
+    poller.start()
     yield
+    poller.stop()
 
 
 app = FastAPI(title="AI Career Coach", lifespan=lifespan)
@@ -53,7 +62,9 @@ def health():
         "llm_key_configured": bool(config.GROQ_API_KEY) or config.LLM_PROVIDER == "ollama",
         "github_token_configured": bool(config.GITHUB_TOKEN),
         "tokens_used_today": limiter.used_today,
-        "poller": "not started",
+        "poller": "running" if poller.running else "stopped",
+        "poll_interval_seconds": poller.interval,
+        "poller_last_tick": poller.last_tick,
     }
 
 

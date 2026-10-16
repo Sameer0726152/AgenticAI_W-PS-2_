@@ -21,6 +21,10 @@ def ensure_blobs(conn: sqlite3.Connection, owner: str, name: str, blob_shas: lis
 
 def take_snapshot(conn: sqlite3.Connection, repo: sqlite3.Row, head: Head) -> int:
     """Store the commit, its selected files and their contents. Returns the snapshot id (reuses existing)."""
+    conn.execute(
+        "UPDATE repos SET last_seen_sha = ?, etag = ?, last_polled_at = ? WHERE id = ?",
+        (head.sha, head.etag, db.utc_now(), repo["id"]),
+    )
     existing = conn.execute(
         "SELECT id FROM snapshots WHERE repo_id = ? AND commit_sha = ?", (repo["id"], head.sha)
     ).fetchone()
@@ -38,10 +42,6 @@ def take_snapshot(conn: sqlite3.Connection, repo: sqlite3.Row, head: Head) -> in
         [(snapshot_id, f["path"], f["sha"], f["size"], int(f["included"]), f["skip_reason"]) for f in files],
     )
     ensure_blobs(conn, repo["owner"], repo["name"], [f["sha"] for f in files if f["included"]])
-    conn.execute(
-        "UPDATE repos SET last_seen_sha = ?, etag = ?, last_polled_at = ? WHERE id = ?",
-        (head.sha, head.etag, db.utc_now(), repo["id"]),
-    )
     return snapshot_id
 
 

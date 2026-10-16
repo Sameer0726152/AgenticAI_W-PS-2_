@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { api } from "../api.js";
 import EvidenceList from "../components/EvidenceList.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
+import ChangeBanner from "../components/ChangeBanner.jsx";
+import Timeline from "../components/Timeline.jsx";
+import WatchStatus from "../components/WatchStatus.jsx";
 import { formatTime, useLatestRun } from "../useLatestRun.js";
 
 export default function AssessmentPage() {
@@ -63,6 +66,7 @@ export default function AssessmentPage() {
             </button>
           </div>
         </div>
+        <WatchStatus repoId={repoId} latest={latest} />
         {(error || pollError) && <p className="error">{error || pollError}</p>}
         {!run && <p className="muted">No assessment yet. Click “Re-run assessment”.</p>}
         {run && (
@@ -79,6 +83,16 @@ export default function AssessmentPage() {
           </p>
         )}
         {run?.status === "failed" && <p className="error">Assessment failed: {run.error}</p>}
+        {run?.status === "done" && (
+          <ChangeBanner
+            trigger={run.trigger}
+            commitSha={run.commit_sha}
+            commitMessage={run.commit_message}
+            changedFiles={run.changed_files}
+            changes={run.changes}
+            finishedAt={run.finished_at}
+          />
+        )}
         <p className="muted note">
           “Not demonstrated” means no evidence was found in the analyzed files of this repository. It does not mean
           the skill is absent.
@@ -106,6 +120,7 @@ export default function AssessmentPage() {
                     <StatusBadge status={s.status} />
                     {s.confidence && <div className="muted">confidence: {s.confidence}</div>}
                     <div className="muted">method: {s.method}</div>
+                    {s.carried_over && <div className="muted">carried over (not affected by the last change)</div>}
                   </td>
                   <td>
                     <div>{s.rationale}</div>
@@ -117,6 +132,8 @@ export default function AssessmentPage() {
           </table>
         </section>
       )}
+
+      <Timeline repoId={repoId} refreshKey={`${latest.run_id}-${latest.status}`} />
     </div>
   );
 }

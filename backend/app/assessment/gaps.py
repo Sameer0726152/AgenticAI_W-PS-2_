@@ -60,6 +60,9 @@ def gap_analysis(conn: sqlite3.Connection, repo_id: int, job_id: int) -> dict | 
         "commit_sha": run.commit_sha if run else None,
         "commit_message": run.commit_message if run else None,
         "assessed_at": run.finished_at if run else None,
+        "trigger": run.trigger if run else None,
+        "changed_files": [c.model_dump() for c in run.changed_files] if run else [],
+        "changes": [c.model_dump() for c in run.changes] if run else [],
         "rows": rows,
         "summary": {
             "required_total": count("required", STATUS_RANK),
