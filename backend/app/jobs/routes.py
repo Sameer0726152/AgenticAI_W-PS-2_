@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Response
 
 from app import db
+from app.assessment.pipeline import execute_run, start_runs_for_new_skills
 from app.jobs.extract import extract_requirements
 from app.jobs.fetch import JobFetchError, fetch_job
 from app.llm.client import LLMError
@@ -30,7 +31,7 @@ def _load_job(conn, job_id: int, dropped: int = 0) -> Job:
 
 
 @router.post("", response_model=Job, status_code=201)
-def create_job(payload: JobCreate, response: Response):
+def create_job(payload: JobCreate, response: Response, background: BackgroundTasks):
     with db.transaction() as conn:
         existing = conn.execute("SELECT id FROM jobs WHERE source_url = ?", (payload.url.strip(),)).fetchone()
         if existing:
@@ -66,7 +67,11 @@ def create_job(payload: JobCreate, response: Response):
             "VALUES (?, ?, ?, ?, 1)",
             [(job_id, r["skill_id"], r["importance"], r["quote"]) for r in extracted["requirements"]],
         )
-        return _load_job(conn, job_id, dropped=extracted["dropped"])
+        job = _load_job(conn, job_id, dropped=extracted["dropped"])
+
+    for run_id in start_runs_for_new_skills():
+        background.add_task(execute_run, run_id)
+    return job
 
 
 @router.get("", response_model=list[JobSummary])

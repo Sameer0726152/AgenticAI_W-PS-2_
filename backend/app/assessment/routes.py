@@ -75,6 +75,17 @@ def list_runs(repo_id: int):
     return [_summary(r) for r in rows]
 
 
+@router.get("/gaps")
+def get_gaps(repo_id: int, job_id: int):
+    from app.assessment.gaps import gap_analysis  # avoids a circular import (gaps uses load_run)
+
+    with db.transaction() as conn:
+        result = gap_analysis(conn, repo_id, job_id)
+    if result is None:
+        raise HTTPException(404, "Job not found")
+    return result
+
+
 @router.get("/repos/{repo_id}/latest-run")
 def latest_run(repo_id: int):
     with db.transaction() as conn:

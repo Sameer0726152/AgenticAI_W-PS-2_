@@ -26,4 +26,5 @@ export const api = {
   latestRun: (repoId) => request(`/api/repos/${repoId}/latest-run`),
   getRun: (runId) => request(`/api/runs/${runId}`),
   listRuns: (repoId) => request(`/api/repos/${repoId}/runs`),
+  gaps: (repoId, jobId) => request(`/api/gaps?repo_id=${repoId}&job_id=${jobId}`),
 };

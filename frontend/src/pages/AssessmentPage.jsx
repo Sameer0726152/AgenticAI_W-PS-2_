@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../api.js";
 import EvidenceList from "../components/EvidenceList.jsx";
 import StatusBadge from "../components/StatusBadge.jsx";
-
-const POLL_MS = 3000;
+import { formatTime, useLatestRun } from "../useLatestRun.js";
 
 export default function AssessmentPage() {
   const [repos, setRepos] = useState([]);
   const [repoId, setRepoId] = useState(null);
   const [run, setRun] = useState(null);
   const [error, setError] = useState(null);
-  const latest = useRef({ run_id: null, status: null });
+  const [requested, setRequested] = useState(null); // run id started from this page
+  const { latest, error: pollError } = useLatestRun(repoId);
 
   useEffect(() => {
     api
@@ -22,38 +22,19 @@ export default function AssessmentPage() {
       .catch((e) => setError(e.message));
   }, []);
 
-  // Check for a new or finished run every few seconds; reload details only when something changed.
   useEffect(() => {
-    if (!repoId) return;
-    latest.current = { run_id: null, status: null };
-    setRun(null);
-    let stopped = false;
-
-    async function check() {
-      try {
-        const l = await api.latestRun(repoId);
-        if (stopped) return;
-        if (l.run_id && (l.run_id !== latest.current.run_id || l.status !== latest.current.status)) {
-          latest.current = l;
-          setRun(await api.getRun(l.run_id));
-        }
-        setError(null);
-      } catch (e) {
-        setError(e.message);
-      }
+    if (!latest.run_id) {
+      setRun(null);
+      return;
     }
-    check();
-    const timer = setInterval(check, POLL_MS);
-    return () => {
-      stopped = true;
-      clearInterval(timer);
-    };
-  }, [repoId]);
+    api.getRun(latest.run_id).then(setRun).catch((e) => setError(e.message));
+  }, [latest.run_id, latest.status]);
 
   async function rerun() {
     setError(null);
     try {
-      await api.assess(repoId);
+      const r = await api.assess(repoId);
+      setRequested(r.run_id);
     } catch (e) {
       setError(e.message);
     }
@@ -82,13 +63,19 @@ export default function AssessmentPage() {
             </button>
           </div>
         </div>
-        {error && <p className="error">{error}</p>}
+        {(error || pollError) && <p className="error">{error || pollError}</p>}
         {!run && <p className="muted">No assessment yet. Click “Re-run assessment”.</p>}
         {run && (
           <p className="muted">
             Run #{run.id} · commit <span className="mono">{run.commit_sha.slice(0, 7)}</span> “{run.commit_message}” ·
             trigger: {run.trigger} · status: <strong>{run.status}</strong>
-            {run.finished_at && <> · finished {run.finished_at}</>}
+            {run.finished_at && <> · finished {formatTime(run.finished_at)}</>}
+          </p>
+        )}
+        {requested && run?.id === requested && run.status === "done" && (
+          <p className="notice">
+            Run #{run.id} finished at {formatTime(run.finished_at)}.
+            {run.prev_run_id ? " Same commit as before, so results are unchanged (reused from cache, 0 tokens)." : ""}
           </p>
         )}
         {run?.status === "failed" && <p className="error">Assessment failed: {run.error}</p>}

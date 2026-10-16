@@ -79,6 +79,24 @@ def start_run(conn: sqlite3.Connection, repo_id: int, trigger: str) -> int:
     return cur.lastrowid
 
 
+def start_runs_for_new_skills() -> list[int]:
+    """After a job is added: re-assess repos whose latest run lacks some skill of interest.
+    Already-assessed skills come from the LLM cache, so only the new skills cost tokens."""
+    run_ids = []
+    with db.transaction() as conn:
+        wanted = {s["id"] for s in skills_of_interest(conn)}
+        for repo in conn.execute("SELECT id FROM repos").fetchall():
+            if conn.execute("SELECT 1 FROM runs WHERE repo_id = ? AND status = 'running'", (repo["id"],)).fetchone():
+                continue
+            last = conn.execute(
+                "SELECT id FROM runs WHERE repo_id = ? AND status = 'done' ORDER BY id DESC LIMIT 1", (repo["id"],)
+            ).fetchone()
+            have = {r["skill_id"] for r in conn.execute("SELECT skill_id FROM skill_results WHERE run_id = ?", (last["id"],))} if last else set()
+            if last and wanted - have:
+                run_ids.append(start_run(conn, repo["id"], "new_skills"))
+    return run_ids
+
+
 def _save_result(conn, run_id: int, skill_id: int, result: FinalResult, repo, commit_sha: str) -> None:
     cur = conn.execute(
         "INSERT INTO skill_results (run_id, skill_id, status, confidence, rationale, method) VALUES (?, ?, ?, ?, ?, ?)",

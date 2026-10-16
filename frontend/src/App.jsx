@@ -3,11 +3,13 @@ import { api } from "./api.js";
 import JobsPage from "./pages/JobsPage.jsx";
 import RepoPage from "./pages/RepoPage.jsx";
 import AssessmentPage from "./pages/AssessmentPage.jsx";
+import GapPage from "./pages/GapPage.jsx";
 
 const TABS = [
   { id: "jobs", label: "Jobs" },
   { id: "repo", label: "Repository" },
   { id: "assessment", label: "Assessment" },
+  { id: "gaps", label: "Gap analysis" },
 ];
 
 export default function App() {
@@ -57,6 +59,7 @@ export default function App() {
         {tab === "jobs" && <JobsPage onJobAdded={refreshHealth} />}
         {tab === "repo" && <RepoPage />}
         {tab === "assessment" && <AssessmentPage />}
+        {tab === "gaps" && <GapPage />}
       </main>
     </div>
   );

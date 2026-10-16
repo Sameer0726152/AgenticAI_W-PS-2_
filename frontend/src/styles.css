@@ -68,6 +68,13 @@ button.small { background: none; color: var(--muted); padding: 2px 6px; }
 .snippet { background: #f3f4f6; border-radius: 6px; padding: 8px; overflow-x: auto; font-size: 0.8rem; margin: 4px 0; }
 select { font: inherit; padding: 8px; border: 1px solid var(--border); border-radius: 6px; max-width: 100%; }
 
+.notice { background: #e8effc; color: var(--accent); border-radius: 6px; padding: 8px; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); flex: 1 1 260px; }
+.tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+.tile { border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; min-width: 150px; }
+.tile-value { font-size: 1.5rem; font-weight: 700; }
+.gap-row { background: #fafbfc; }
+
 .muted { color: var(--muted); font-size: 0.9rem; }
 .mono { font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; }
 .error { color: var(--bad); }
