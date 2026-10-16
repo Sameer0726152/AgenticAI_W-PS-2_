@@ -2,12 +2,51 @@
 import json
 import logging
 import sqlite3
+from dataclasses import dataclass
 
 from app import db
-from app.analysis import rules
+from app.analysis import llm_evidence, rules
 from app.github import client
+from app.llm.client import LLMError
+from app.llm.rate_limit import BudgetExceeded
 
 log = logging.getLogger(__name__)
+
+MAX_EVIDENCE = 5
+
+
+@dataclass
+class FinalResult:
+    status: str
+    confidence: str | None
+    rationale: str
+    method: str  # rules | llm | rules+llm
+    evidence: list[rules.Evidence]
+
+
+def assess_skill(skill: sqlite3.Row, files: list[dict], rule: rules.RuleResult) -> FinalResult:
+    """Combine rule evidence with an LLM review. Nothing is 'demonstrated' without verified evidence."""
+    hints = rules.hints_of(skill)
+    if skill["key"] == "version_control" or not llm_evidence.has_signal(skill, hints, files, rule):
+        return FinalResult(rule.status, rule.confidence, rule.rationale, "rules", rule.evidence)
+
+    try:
+        llm = llm_evidence.assess(skill, hints, files, rule)
+    except (LLMError, BudgetExceeded) as e:
+        log.warning("LLM review failed for %s: %s", skill["key"], e)
+        return FinalResult(rule.status, rule.confidence, f"{rule.rationale} (LLM review unavailable: rules only)",
+                           "rules", rule.evidence)
+
+    dropped = f" ({llm.dropped} unverifiable citation(s) discarded.)" if llm.dropped else ""
+    if llm.status != "not_demonstrated" and llm.evidence:
+        llm_spans = {(e.path, e.start_line) for e in llm.evidence}
+        extra = [e for e in rule.evidence if (e.path, e.start_line) not in llm_spans]
+        return FinalResult(llm.status, llm.confidence, llm.rationale + dropped,
+                           "rules+llm" if rule.evidence else "llm", (llm.evidence + extra)[:MAX_EVIDENCE])
+    if rule.status != "not_demonstrated":
+        # The LLM cannot take away what the rules proved; it found no further verified evidence.
+        return FinalResult(rule.status, rule.confidence, rule.rationale + dropped, "rules", rule.evidence)
+    return FinalResult("not_demonstrated", None, llm.rationale + dropped, "rules+llm", [])
 
 
 def skills_of_interest(conn: sqlite3.Connection) -> list[sqlite3.Row]:
@@ -40,10 +79,10 @@ def start_run(conn: sqlite3.Connection, repo_id: int, trigger: str) -> int:
     return cur.lastrowid
 
 
-def _save_result(conn, run_id: int, skill_id: int, result: rules.RuleResult, repo, commit_sha: str) -> None:
+def _save_result(conn, run_id: int, skill_id: int, result: FinalResult, repo, commit_sha: str) -> None:
     cur = conn.execute(
-        "INSERT INTO skill_results (run_id, skill_id, status, confidence, rationale, method) VALUES (?, ?, ?, ?, ?, 'rules')",
-        (run_id, skill_id, result.status, result.confidence, result.rationale),
+        "INSERT INTO skill_results (run_id, skill_id, status, confidence, rationale, method) VALUES (?, ?, ?, ?, ?, ?)",
+        (run_id, skill_id, result.status, result.confidence, result.rationale, result.method),
     )
     owner, name = repo["owner"], repo["name"]
     for ev in result.evidence:
@@ -53,8 +92,8 @@ def _save_result(conn, run_id: int, skill_id: int, result: rules.RuleResult, rep
             link = client.permalink(owner, name, commit_sha, ev.path, ev.start_line, ev.end_line)
         conn.execute(
             """INSERT INTO evidence (skill_result_id, path, start_line, end_line, snippet, commit_sha, permalink, source, verified)
-               VALUES (?, ?, ?, ?, ?, ?, ?, 'rule', 1)""",
-            (cur.lastrowid, ev.path, ev.start_line, ev.end_line, ev.snippet, commit_sha, link),
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)""",
+            (cur.lastrowid, ev.path, ev.start_line, ev.end_line, ev.snippet, commit_sha, link, ev.source),
         )
 
 
@@ -70,14 +109,19 @@ def execute_run(run_id: int) -> None:
 
         commit_count = client.count_commits(repo["owner"], repo["name"], snap["commit_sha"])
 
+        # LLM calls can wait on the rate limiter, so compute everything before opening a write transaction.
+        results = []
+        for skill in skills:
+            if skill["key"] == "version_control":
+                rule = rules.evaluate_version_control(
+                    commit_count, repo["branch"], any(f["path"] == ".gitignore" for f in files)
+                )
+            else:
+                rule = rules.evaluate(skill["label"], rules.hints_of(skill), files)
+            results.append((skill, assess_skill(skill, files, rule)))
+
         with db.transaction() as conn:
-            for skill in skills:
-                if skill["key"] == "version_control":
-                    result = rules.evaluate_version_control(
-                        commit_count, repo["branch"], any(f["path"] == ".gitignore" for f in files)
-                    )
-                else:
-                    result = rules.evaluate(skill["label"], rules.hints_of(skill), files)
+            for skill, result in results:
                 _save_result(conn, run_id, skill["id"], result, repo, snap["commit_sha"])
             conn.execute(
                 "UPDATE runs SET status = 'done', affected_skills = ?, finished_at = ? WHERE id = ?",

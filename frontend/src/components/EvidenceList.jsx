@@ -15,7 +15,10 @@ export default function EvidenceList({ evidence }) {
                 {e.path}
                 {lineLabel(e)}
               </a>{" "}
-              <span className="muted">({e.source})</span>
+              <span className="muted">
+                ({e.source === "llm" ? "LLM citation" : "rule"}
+                {e.verified && e.source === "llm" ? ", verified in file" : ""})
+              </span>
             </summary>
             {e.snippet && <pre className="snippet">{e.snippet}</pre>}
           </details>

@@ -17,7 +17,8 @@ class Evidence:
     start_line: int | None
     end_line: int | None
     snippet: str
-    kind: str  # code | path | dependency | history
+    kind: str  # code | path | dependency | history | llm
+    source: str = "rule"  # rule | llm
 
 
 @dataclass
