@@ -13,6 +13,7 @@ from app.llm.rate_limit import limiter
 from app.schemas import Skill
 from app.skills.taxonomy import list_skills
 from app.watch.poller import poller
+from app.watch.webhook import router as webhook_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
@@ -47,6 +48,7 @@ app.add_middleware(
 app.include_router(jobs_router)
 app.include_router(repos_router)
 app.include_router(assessments_router)
+app.include_router(webhook_router)
 
 
 @app.get("/", include_in_schema=False)
@@ -65,6 +67,7 @@ def health():
         "poller": "running" if poller.running else "stopped",
         "poll_interval_seconds": poller.interval,
         "poller_last_tick": poller.last_tick,
+        "webhook_secret_configured": bool(config.GITHUB_WEBHOOK_SECRET),
     }
 
 

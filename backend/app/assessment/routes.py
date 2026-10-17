@@ -114,6 +114,8 @@ def get_gaps(repo_id: int, job_id: int):
 
 @router.get("/repos/{repo_id}/latest-run")
 def latest_run(repo_id: int):
+    from app.watch.webhook import last_webhook_at
+
     with db.transaction() as conn:
         repo = conn.execute("SELECT last_polled_at, polling_enabled FROM repos WHERE id = ?", (repo_id,)).fetchone()
         row = conn.execute(
@@ -124,4 +126,5 @@ def latest_run(repo_id: int):
         "status": row["status"] if row else None,
         "last_polled_at": repo["last_polled_at"] if repo else None,
         "polling": bool(repo["polling_enabled"]) if repo else False,
+        "last_webhook_at": last_webhook_at.get(repo_id),
     }

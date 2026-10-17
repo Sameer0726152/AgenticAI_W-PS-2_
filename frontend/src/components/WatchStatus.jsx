@@ -27,6 +27,7 @@ export default function WatchStatus({ repoId, latest }) {
       <span className="muted">
         {latest.polling ? "Watching GitHub for new commits" : "Polling is off"}
         {latest.last_polled_at && <> · last checked {formatTime(latest.last_polled_at)}</>}
+        {latest.last_webhook_at && <> · webhook push received {formatTime(latest.last_webhook_at)}</>}
         {latest.status === "running" && <strong> · re-assessing…</strong>}
       </span>
       <button className="secondary" onClick={checkNow} disabled={busy}>

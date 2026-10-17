@@ -20,7 +20,7 @@ export function useLatestRun(repoId) {
         const l = await api.latestRun(repoId);
         if (stopped) return;
         const c = current.current;
-        if (l.run_id !== c.run_id || l.status !== c.status || l.last_polled_at !== c.last_polled_at) {
+        if (l.run_id !== c.run_id || l.status !== c.status || l.last_polled_at !== c.last_polled_at || l.last_webhook_at !== c.last_webhook_at) {
           current.current = l;
           setLatest(l);
         }
