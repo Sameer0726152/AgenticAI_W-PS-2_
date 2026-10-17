@@ -33,7 +33,13 @@ export default function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1>AI Career Coach</h1>
+        <div className="brand">
+          <div className="logo" aria-hidden="true">🎯</div>
+          <div>
+            <h1>AI Career Coach</h1>
+            <p className="subtitle">Real job requirements vs. what your GitHub code actually shows</p>
+          </div>
+        </div>
         <div className="health">
           {healthError && <span className="pill bad">Backend: offline</span>}
           {health && (
