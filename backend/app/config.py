@@ -33,6 +33,8 @@ DATABASE_PATH = ROOT_DIR / os.getenv("DATABASE_PATH", "database/career_coach.db"
 MAX_FILES_PER_SNAPSHOT = _int("MAX_FILES_PER_SNAPSHOT", 60)
 MAX_FILE_BYTES = _int("MAX_FILE_BYTES", 100000)
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+# Comma-separated, e.g. "http://localhost:5173,https://career-coach.vercel.app"
+FRONTEND_ORIGINS = [o.strip().rstrip("/") for o in FRONTEND_ORIGIN.split(",") if o.strip()]
 
 HTTP_USER_AGENT = "ai-career-coach/0.1"
 # Trust the OS certificate store (needed when antivirus/proxy software inspects HTTPS).

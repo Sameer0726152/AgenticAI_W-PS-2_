@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from app import config, db
+from app import bootstrap, config, db
 from app.assessment.routes import router as assessments_router
 from app.github.routes import router as repos_router
 from app.jobs.routes import router as jobs_router
@@ -21,6 +21,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.init_db()
+    bootstrap.run()
     with db.transaction() as conn:
         used = conn.execute(
             "SELECT COALESCE(SUM(tokens_used), 0) FROM llm_cache WHERE substr(created_at, 1, 10) = ?",
@@ -41,7 +42,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="AI Career Coach", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[config.FRONTEND_ORIGIN],
+    allow_origins=config.FRONTEND_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
